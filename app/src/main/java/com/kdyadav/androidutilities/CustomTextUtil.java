@@ -1,7 +1,3 @@
-/*
- * Copyright © 2018, DB Corp,
- * Written under contract by Robosoft Technologies Pvt. Ltd.
- */
 
 package com.kdyadav.androidutilities;
 

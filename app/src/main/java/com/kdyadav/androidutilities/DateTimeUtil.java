@@ -266,7 +266,6 @@ public class DateTimeUtil {
             SimpleDateFormat requiredFormat = new SimpleDateFormat(requiredDateFormat, Locale.ENGLISH);
             return getFormattedDate(currentFormat.parse(date), requiredFormat);
         } catch (ParseException e) {
-            //com.schoolcuesadmin.schoolcuesadmins.utilities.htmlCompact.Logger.d("", e.getLocalizedMessage());
         }
         return date;
     }
@@ -312,7 +311,6 @@ public class DateTimeUtil {
         try {
             return getFormattedDate(currentFormat.parse(date), requiredFormat);
         } catch (ParseException e) {
-            //com.schoolcuesadmin.schoolcuesadmins.utilities.htmlCompact.Logger.d("", e.getLocalizedMessage());
         }
         return date;
     }
@@ -442,7 +440,6 @@ public class DateTimeUtil {
     }
 
     private static void logState(String id, String value) {
-        //com.schoolcuesadmin.schoolcuesadmins.utilities.htmlCompact.Logger.d("TIME", id + " : " + value);
     }
 
     private static long getServerTime(long serverTime) {
