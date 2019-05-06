@@ -1,0 +1,81 @@
+package com.kdyadav.androidutilities;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.view.ViewCompat;
+
+
+abstract public class ViewBehavior extends CoordinatorLayout.Behavior<View> {
+
+    protected final int mTouchSlop;
+    protected boolean isFirstMove = true;
+    protected boolean canInit = true;
+
+    public AnimateHelper getmAnimateHelper() {
+        return mAnimateHelper;
+    }
+
+    public void setmAnimateHelper(AnimateHelper mAnimateHelper) {
+        this.mAnimateHelper = mAnimateHelper;
+    }
+
+    protected AnimateHelper mAnimateHelper;
+
+    public ViewBehavior(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+    }
+
+    // on Scroll Started
+    @Override
+    public boolean onStartNestedScroll(CoordinatorLayout coordinatorLayout, View child,
+                                       View directTargetChild, View target, int nestedScrollAxes, int typeTouch) {
+
+        return (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
+    }
+
+    @Override
+    public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, View child, View target,
+                                  int dx, int dy, int[] consumed, int typeTouch) {
+        onNestPreScrollInit(child);
+
+        if (Math.abs(dy) > 2) {
+            if (dy < 0) {
+                if (mAnimateHelper.getState() == TranslateAnimateHelper.STATE_HIDE) {
+                    mAnimateHelper.show();
+                }
+            } else if (dy > 0) {
+                if (mAnimateHelper.getState() == TranslateAnimateHelper.STATE_SHOW) {
+                    mAnimateHelper.hide();
+                }
+            }
+        }
+    }
+
+    protected abstract void onNestPreScrollInit(View child);
+
+    public void show() {
+        mAnimateHelper.show();
+    }
+
+    public void hide() {
+        mAnimateHelper.hide();
+    }
+
+    public static ViewBehavior from(View view) {
+        ViewGroup.LayoutParams params = view.getLayoutParams();
+        if (!(params instanceof CoordinatorLayout.LayoutParams)) {
+            throw new IllegalArgumentException("The view is not a child of CoordinatorLayout");
+        }
+        CoordinatorLayout.Behavior behavior = ((CoordinatorLayout.LayoutParams) params).getBehavior();
+        if (!(behavior instanceof ViewBehavior)) {
+            throw new IllegalArgumentException("The view is not associated with ViewBehavior");
+        }
+        return (ViewBehavior) behavior;
+    }
+}

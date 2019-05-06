@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@drawable/custom_toast_border"
+    android:fitsSystemWindows="false">
+
+
+    <TextView
+        android:id="@+id/toast_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="@dimen/_5sdp"
+        android:text="Toast"
+        android:textAlignment="center"
+        android:textColor="@color/md_white_1000"
+        android:textSize="@dimen/_13ssp"
+        android:textStyle="normal" />
+
+</LinearLayout>

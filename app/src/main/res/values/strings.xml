@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">AndroidUtilities</string>
+    <!--Common for app Apps message-->
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="internal_storage">Internal storage</string>
+    <string name="rationale_storage1">This app needs access to your phone call for <b>EHS</b>.</string>
+    <string name="rationale_storage">This app needs access to your storage so we can upload image for <b>EHS</b>.</string>
+    <string name="no_network_title">There\&#39;s no network connection</string>
+    <string name="no_network_message">Make sure you\&#39;re connected to a wi-fi or \n mobile
+        network and try again
+    </string>
+    <string name="server_error">Looks like our server is having some issues. Please try again later.
+    </string>
+    <string name="server_error_title">Server Error</string>
+    <string name="dismiss">DISMISS</string>
+    <string name="ok">OK</string>
+    <string name="log_token">Log Token</string>
+
+    <string name="msg_subscribed">Subscribed to weather topic</string>
+    <string name="msg_token_fmt" translatable="false">InstanceID Token: %s</string>
+
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <!--
+        This is the name that users will see when interacting with this channel.
+        It should describe the category of notifications that will be sent through this channel
+     -->
+    <string name="default_notification_channel_name" translatable="true">Weather</string>
+    <string name="msg_subscribe_failed">Failed to subscribe to weather topic</string>
+    <string name="fcm_message">FCM Message</string>
 </resources>
