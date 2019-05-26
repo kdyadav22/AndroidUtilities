@@ -35,4 +35,5 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha05'
     implementation 'com.google.android.material:material:1.1.0-alpha06'
     implementation 'com.github.mmoamenn:AnimationsPlus:1.0.0'
+    implementation files('libs/sun.misc.BASE64Decoder.jar')
 }

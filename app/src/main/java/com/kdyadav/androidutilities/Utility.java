@@ -9,12 +9,22 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -32,17 +42,29 @@ import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Math.floor;
+import static java.lang.Math.random;
+import static java.lang.Math.round;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.out;
@@ -55,8 +77,12 @@ public class Utility {
     public String TAG = "Utility";
     public static final String DATE_TIME = "dd MMM yyyy HH:mm:ss z";
     private static int colorAccent = -1;
-
-    private Utility() {
+    public static String[] usernameStringArray(String userID) {
+        String str[] = new String[userID.length() - 2];
+        for (int i = 0; i < str.length; i++) {
+            str[i] = userID.substring(i, i + 3);
+        }
+        return str;
     }
 
     public static boolean isValidPassword(String[] userID, String password) {
@@ -67,30 +93,44 @@ public class Utility {
         }
         return false;
     }
+
+    public static List<String> usernameStringArrayList(String userID) {
+        List<String> substrings = new ArrayList<>();
+        for (int i = 0; i < userID.length() - 2; i++) {
+            substrings.add(userID.substring(i, i + 3));
+        }
+        //return !substrings.Any(s -> newPassword.contains(s));
+        return substrings;
+    }
+
     public static boolean isNotNullNotEmptyNotWhiteSpace(final String string) {
         return string != null && !string.isEmpty() && !string.trim().isEmpty();
     }
+
     public static boolean matchString(String str1, String str2) {
         return str1.equals(str2);
     }
-    public static int generateUserIdInInt() {
+
+    public static int generateIntegerId() {
         int text = 0;
         String possible = "0123456789";
 
         for (int i = 0; i < possible.length(); i++)
-            text += possible.charAt((int) Math.floor(Math.random() * possible.length()));
+            text += possible.charAt((int) floor(random() * possible.length()));
 
         return text;
     }
-    public static String generateUserIdInString() {
+
+    public static String generateUserID() {
         StringBuilder text = new StringBuilder();
         String possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
         for (int i = 0; i < 11; i++)
-            text.append(possible.charAt((int) Math.floor(Math.random() * possible.length())));
+            text.append(possible.charAt((int) floor(random() * possible.length())));
 
         return text.toString();
     }
+
     public static boolean emailValidator(String email) {
         Pattern pattern;
         Matcher matcher;
@@ -135,29 +175,23 @@ public class Utility {
     }
 
     public static boolean checkPhoneNumber(String phoneNumber) {
-        out.println(phoneNumber.length());
+        System.out.println(phoneNumber.length());
         String regex = "^\\+?[0-9. ()-]{0,25}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(phoneNumber);
 
         if (matcher.matches()) {
-            out.println("Phone Number Valid");
+            System.out.println("Phone Number Valid");
             return true;
         } else {
-            out.println("Phone Number must be in the form XXX-XXXXXXX");
+            System.out.println("Phone Number must be in the form XXX-XXXXXXX");
             return false;
         }
     }
 
-    private static String uniqueProfileId() {
+    public static String uniqueUUID() {
         UUID id = UUID.randomUUID();
         return String.valueOf(id);
-    }
-
-    public static String uniqueImageName() {
-        String imageName = uniqueProfileId() + ".jpg";
-        Log.d("IMAGE_NAME", "IMAGE_NAME:" + imageName);
-        return imageName;
     }
 
     private static void setFontTextView(ViewGroup group, Typeface font) {
@@ -213,44 +247,40 @@ public class Utility {
         months = currMonth - birthMonth;
 
         //if month difference is in negative then reduce years by one and calculate the number of months.
-        if (months == 0 && currentDay.get(Calendar.DATE) < birthDay.get(Calendar.DATE)) {
-            years--;
-            months = 11;
-        } else if (months < 0) {
+        if (months < 0) {
             years--;
             months = 12 - birthMonth + currMonth;
 
             if (currentDay.get(Calendar.DATE) < birthDay.get(Calendar.DATE))
                 months--;
 
+        } else if (months == 0 && currentDay.get(Calendar.DATE) < birthDay.get(Calendar.DATE)) {
+            years--;
+            months = 11;
         }
 
 
         //Calculate the days
-        if (currentDay.get(Calendar.DATE) <= birthDay.get(Calendar.DATE)) {
-            if (currentDay.get(Calendar.DATE) < birthDay.get(Calendar.DATE)) {
-                int today = currentDay.get(Calendar.DAY_OF_MONTH);
-                currentDay.add(Calendar.MONTH, -1);
-                days = currentDay.getActualMaximum(Calendar.DAY_OF_MONTH) - birthDay.get(Calendar.DAY_OF_MONTH) + today;
-            } else {
-                days = 0;
-                if (months == 12) {
-                    years++;
-                    months = 0;
-                }
-            }
-        } else {
+        if (currentDay.get(Calendar.DATE) > birthDay.get(Calendar.DATE))
             days = currentDay.get(Calendar.DATE) - birthDay.get(Calendar.DATE);
+        else if (currentDay.get(Calendar.DATE) < birthDay.get(Calendar.DATE)) {
+            int today = currentDay.get(Calendar.DAY_OF_MONTH);
+            currentDay.add(Calendar.MONTH, -1);
+            days = currentDay.getActualMaximum(Calendar.DAY_OF_MONTH) - birthDay.get(Calendar.DAY_OF_MONTH) + today;
+        } else {
+            days = 0;
+            if (months == 12) {
+                years++;
+                months = 0;
+            }
         }
         hour = currentDay.get(Calendar.HOUR_OF_DAY) - birthDay.get(Calendar.HOUR_OF_DAY);
-        if (hour >= 0) {
-        } else {
+        if (hour < 0) {
             days--;
             hour += 24;
         }
         min = currentDay.get(Calendar.MINUTE) - birthDay.get(Calendar.MINUTE);
-        if (min >= 0) {
-        } else {
+        if (min < 0) {
             hour--;
             if (hour < 0) {
                 days--;
@@ -272,7 +302,7 @@ public class Utility {
             sec += 60;
         }
 
-        out.println("The age is : " + years + " years, " + months + " months,  " + days + " days, " + hour + " hours, " + min + " min and " + sec + " seconds.");
+        System.out.println("The age is : " + years + " years, " + months + " months,  " + days + " days, " + hour + " hours, " + min + " min and " + sec + " seconds.");
         return new Age(days, months, years);
     }
 
@@ -282,6 +312,25 @@ public class Utility {
         rotate.setInterpolator(new LinearInterpolator());
         rotate.setDuration(1800);
         image.startAnimation(rotate);
+    }
+
+    /**
+     * Show Soft Keyboard with new Thread
+     *
+     * @param activity
+     */
+    public static void hideSoftInput(final Activity activity) {
+        if (activity.getCurrentFocus() != null) {
+            new Runnable() {
+                public void run() {
+                    InputMethodManager imm =
+                            (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+                    }
+                }
+            }.run();
+        }
     }
 
     /**
@@ -302,6 +351,7 @@ public class Utility {
             }
         }.run();
     }
+
     /**
      * Show Soft Keyboard with new Thread
      *
@@ -321,7 +371,7 @@ public class Utility {
         }.run();
     }
 
-    public static void hideKeyboard(View view, final Activity activity){
+    public static void hideKeyboard(View view, final Activity activity) {
         if (!(view instanceof EditText)) {
             view.setOnTouchListener(new View.OnTouchListener() {
 
@@ -389,7 +439,7 @@ public class Utility {
             //
             if (currentTime.before(startTime)) {
 
-                out.println(" Time is Lesser ");
+                System.out.println(" Time is Lesser ");
 
                 valid = false;
             } else {
@@ -400,16 +450,17 @@ public class Utility {
 
                 }
 
-                out.println("Comparing , Start Time /n " + startTime);
-                out.println("Comparing , End Time /n " + endTime);
-                System.out.println("Comparing , Current Time /n " + currentTime);
+                System.out.println("Comparing , Start Time /n " + startTime);
+                System.out.println("Comparing , End Time /n " + endTime);
+                System.out
+                        .println("Comparing , Current Time /n " + currentTime);
 
                 if (currentTime.before(endTime)) {
-                    out.println("RESULT, Time lies b/w");
+                    System.out.println("RESULT, Time lies b/w");
                     valid = true;
                 } else {
                     valid = false;
-                    out.println("RESULT, Time does not lies b/w");
+                    System.out.println("RESULT, Time does not lies b/w");
                 }
 
             }
@@ -466,10 +517,8 @@ public class Utility {
     public static boolean doNotNotifyWithinHour(long doNotNotifyWithinHourCurrentTime) {
         boolean withinHour = false;
         try {
-            long currentTimeString = currentTimeMillis();
+            long currentTimeString = System.currentTimeMillis();
             try {
-                //Log.d(TAG, "Do not Notify");
-//Log.d(TAG, "Do Notify");
                 return doNotNotifyWithinHourCurrentTime > currentTimeString;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -544,36 +593,30 @@ public class Utility {
         private int years;
 
         @SuppressWarnings("unused")
-        private Age()
-        {
+        private Age() {
             //Prevent default constructor
         }
 
-        public Age(int days, int months, int years)
-        {
+        public Age(int days, int months, int years) {
             this.days = days;
             this.months = months;
             this.years = years;
         }
 
-        public int getDays()
-        {
+        public int getDays() {
             return this.days;
         }
 
-        public int getMonths()
-        {
+        public int getMonths() {
             return this.months;
         }
 
-        public int getYears()
-        {
+        public int getYears() {
             return this.years;
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return years + " Years, " + months + " Months, " + days + " Days";
         }
     }
@@ -587,7 +630,7 @@ public class Utility {
             titleView.setGravity(Gravity.CENTER_HORIZONTAL);
             final Toolbar.LayoutParams layoutParams = (Toolbar.LayoutParams) titleView.getLayoutParams();
             layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            layoutParams.setMargins(0,0,60,0);
+            layoutParams.setMargins(0, 0, 60, 0);
             toolbar.requestLayout();
         }
     }
@@ -615,18 +658,189 @@ public class Utility {
             long diffHours = diff / (60 * 60 * 1000) % 24;
             long diffDays = diff / (24 * 60 * 60 * 1000);
 
-            out.print(diffDays + " days, ");
-            out.print(diffHours + " hours, ");
-            out.print(diffMinutes + " minutes, ");
-            out.print(diffSeconds + " seconds.");
+            System.out.print(diffDays + " days, ");
+            System.out.print(diffHours + " hours, ");
+            System.out.print(diffMinutes + " minutes, ");
+            System.out.print(diffSeconds + " seconds.");
 
-            difference = format("%d.%d", String.valueOf(diffHours), String.valueOf(diffMinutes));
+            difference = String.format("%d.%d", String.valueOf(diffHours), String.valueOf(diffMinutes));
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return difference;
+    }
+
+    /**
+     * Converting dp to pixel
+     */
+    public static int dpToPx(Activity activity, int dp) {
+        Resources r = activity.getResources();
+        return round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
+    }
+
+    private Bitmap getBitmapFromUri(Activity activity, Uri uri) throws IOException {
+        ParcelFileDescriptor parcelFileDescriptor =
+                activity.getContentResolver().openFileDescriptor(uri, "r");
+        FileDescriptor fileDescriptor = Objects.requireNonNull(parcelFileDescriptor).getFileDescriptor();
+        Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+        parcelFileDescriptor.close();
+        return image;
+    }
+
+    public static Date formattedDate(DateFormat dateFormatter, String dateString) {
+        try {
+            return dateFormatter.parse(dateString);
+        } catch (ParseException e) {
+            e.getMessage();
+        }
+        return null;
+    }
+
+    public static String formattedDateString(DateFormat dateFormatter, Date date) {
+        try {
+            return dateFormatter.format(date);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+        return null;
+    }
+
+    public static String formattedDateString(DateFormat responseDateFormatter, DateFormat displayDateFormatter, String dateString) {
+        try {
+            return displayDateFormatter.format(responseDateFormatter.parse(dateString));
+        } catch (ParseException e) {
+            e.getMessage();
+        }
+        return "";
+    }
+
+    public static String getLastnCharacters(String inputString, int subStringLength) {
+        int length = inputString.length();
+        if (length <= subStringLength) {
+            return inputString;
+        }
+        int startIndex = length - subStringLength;
+        return inputString.substring(startIndex);
+    }
+
+    public static int getRandomColor() {
+        Random rnd = new Random();
+        return Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+    }
+
+    public static String uniqueImageName() {
+        String imageName = uniqueUUID() + ".jpg";
+        Log.d("IMAGE_NAME", "IMAGE_NAME:" + imageName);
+        return imageName;
+    }
+
+    private void setPic(String currentPhotoPath, ImageView imageView) {
+        // Get the dimensions of the View
+        int targetW = imageView.getWidth();
+        int targetH = imageView.getHeight();
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+        imageView.setImageBitmap(bitmap);
+    }
+
+    public Bitmap rotateBitmapOrientation(String photoFilePath) {
+        // Create and configure BitmapFactory
+        BitmapFactory.Options bounds = new BitmapFactory.Options();
+        bounds.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(photoFilePath, bounds);
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        Bitmap bm = BitmapFactory.decodeFile(photoFilePath, opts);
+        // Read EXIF Data
+        ExifInterface exif = null;
+        try {
+            exif = new ExifInterface(photoFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String orientString = Objects.requireNonNull(exif).getAttribute(ExifInterface.TAG_ORIENTATION);
+        int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
+        int rotationAngle = 0;
+        if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
+        if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotationAngle = 180;
+        if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotationAngle = 270;
+        // Rotate Bitmap
+        Matrix matrix = new Matrix();
+        matrix.setRotate(rotationAngle, (float) bm.getWidth() / 2, (float) bm.getHeight() / 2);
+        // Return result
+        return Bitmap.createBitmap(bm, 0, 0, bounds.outWidth, bounds.outHeight, matrix, true);
+    }
+
+    public File getPhotoFileUri(Activity activity, String fileName) {
+        // Get safe storage directory for photos
+        // Use `getExternalFilesDir` on Context to access package-specific directories.
+        // This way, we don't need to request external read/write runtime permissions.
+        File mediaStorageDir = new File(Objects.requireNonNull(activity).getExternalFilesDir(Environment.DIRECTORY_PICTURES), "");
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
+        }
+
+        // Return the file target for the photo based on filename
+
+        return new File(mediaStorageDir.getPath() + File.separator + fileName);
+    }
+
+    public static String imageFileName(String url) {
+        return url.substring(url.lastIndexOf('/') + 1);
+    }
+
+    public static boolean removeDirectory(File directory) {
+
+        // System.out.println("removeDirectory " + directory);
+
+        if (directory == null)
+            return false;
+        if (!directory.exists())
+            return true;
+        if (!directory.isDirectory())
+            return false;
+
+        String[] list = directory.list();
+
+        // Some JVMs return null for File.list() when the
+        // directory is empty.
+        if (list != null) {
+            for (int i = 0; i < list.length; i++) {
+                File entry = new File(directory, list[i]);
+
+                //        System.out.println("\tremoving entry " + entry);
+
+                if (entry.isDirectory())
+                {
+                    if (!removeDirectory(entry))
+                        return false;
+                }
+                else
+                {
+                    if (!entry.delete())
+                        return false;
+                }
+            }
+        }
+
+        return directory.delete();
     }
 
     public static Point getScreenDimensions(Context context) {
@@ -713,24 +927,6 @@ public class Utility {
      */
     public static boolean hasMarshmallow() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
-    }
-
-    /**
-     * API 23
-     *
-     * @see Build.VERSION_CODES#M
-     */
-    public static boolean hasNought() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
-    }
-
-    /**
-     * API 23
-     *
-     * @see Build.VERSION_CODES#M
-     */
-    public static boolean hasOreo() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
     }
 
     public static String getVersionName(Context context) {
@@ -826,7 +1022,12 @@ public class Utility {
         //Set up touch listener for non-text box views to hide keyboard.
         if (!(view instanceof EditText)) {
 
-            view.setOnClickListener(v -> hideSoftInputFrom(context, view));
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    hideSoftInputFrom(context, view);
+                }
+            });
         }
 
         //If a layout container, iterate over children and seed recursion.
@@ -840,5 +1041,6 @@ public class Utility {
             }
         }
     }
+
 
 }

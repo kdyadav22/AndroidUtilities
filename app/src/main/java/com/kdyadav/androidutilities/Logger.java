@@ -5,7 +5,7 @@ import android.util.Log;
 
 
 public final class Logger {
-    private static final String GENERAL_TAG = "TAG:";
+    private static final String GENERAL_TAG = "KDYADAV22: ";
 
     private String mTag;
 

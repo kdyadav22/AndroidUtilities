@@ -26,7 +26,7 @@ import java.io.OutputStream;
 /**
  * Created by Kapil Deo Yadav on 1/21/2016
  */
-public class MediaUtitlity {
+public class MediaUtility {
 
     private MediaRecorder myRecorder;
     private String outputFile = null;
@@ -59,7 +59,7 @@ public class MediaUtitlity {
             Manifest.permission.CAPTURE_VIDEO_OUTPUT
     };
 
-    public MediaUtitlity(Activity act) {
+    public MediaUtility(Activity act) {
         c = act;
     }
 
@@ -76,10 +76,10 @@ public class MediaUtitlity {
         }
     }
 
-    public Uri getMediaFileURI(String folderName, String mediaName) {
+    public Uri getMediaFileURI(String dirName, String folderName, String mediaName) {
         File mediaFile = null;
         try {
-            File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/EHSApp/" + folderName);
+            File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/"+dirName+"/" + folderName);
             // Create a media file name
             mediaFile = new File(mediaStorageDir.getPath() + File.separator
                     + mediaName);
@@ -96,10 +96,10 @@ public class MediaUtitlity {
         return Uri.fromFile(mediaFile);
     }
 
-    public File getOutputMediaFile(String folderName, String mediaName) {
+    public File getOutputMediaFile(String dirName,String folderName, String mediaName) {
         File mediaFile = null;
         try {
-            File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/EHSApp/" + folderName);
+            File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/"+dirName+"/" + folderName);
             // Create a media file name
             mediaFile = new File(mediaStorageDir.getPath() + File.separator
                     + mediaName);
