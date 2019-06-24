@@ -15,6 +15,7 @@ import android.os.Environment;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -59,9 +60,6 @@ public class MediaUtility {
             Manifest.permission.CAPTURE_VIDEO_OUTPUT
     };
 
-    public MediaUtility(Activity act) {
-        c = act;
-    }
 
     public static void saveOrieantedImage(Bitmap bitmap, File file) {
 
@@ -74,101 +72,6 @@ public class MediaUtility {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public Uri getMediaFileURI(String dirName, String folderName, String mediaName) {
-        File mediaFile = null;
-        try {
-            File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/"+dirName+"/" + folderName);
-            // Create a media file name
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator
-                    + mediaName);
-            if (mediaFile.exists() == false) {
-                mediaFile.getParentFile().mkdirs();
-                mediaFile.createNewFile();
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
-            Toast.makeText(c, "URI Error="+e,
-             Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-        return Uri.fromFile(mediaFile);
-    }
-
-    public File getOutputMediaFile(String dirName,String folderName, String mediaName) {
-        File mediaFile = null;
-        try {
-            File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/"+dirName+"/" + folderName);
-            // Create a media file name
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator
-                    + mediaName);
-            if (mediaFile.exists() == false) {
-                mediaFile.getParentFile().mkdirs();
-                mediaFile.createNewFile();
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
-            Toast.makeText(c, "URI Error=" + e,
-                    Toast.LENGTH_LONG).show();
-        }
-        return mediaFile;
-    }
-
-    //Photo Managing Part
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-        if (height > reqHeight || width > reqWidth) {
-
-            // Calculate ratios of height and width to requested height and width
-            final int heightRatio = Math.round((float) height / (float) reqHeight);
-            final int widthRatio = Math.round((float) width / (float) reqWidth);
-            // Choose the smallest ratio as inSampleSize value, this will guarantee
-            // a final image with both dimensions larger than or equal to the
-            // requested height and width.
-            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
-        }
-        return inSampleSize;
-    }
-
-    public Bitmap getRotatedBitmap(String path, Bitmap bitmap) {
-        Bitmap rotatedBitmap = null;
-        Matrix m = new Matrix();
-        ExifInterface exif = null;
-        int orientation = 1;
-
-        try {
-            if (path != null) {
-                // Getting Exif information of the file
-                exif = new ExifInterface(path);
-            }
-            if (exif != null) {
-                orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
-                switch (orientation) {
-                    case ExifInterface.ORIENTATION_ROTATE_270:
-                        m.preRotate(270);
-                        break;
-
-                    case ExifInterface.ORIENTATION_ROTATE_90:
-                        m.preRotate(90);
-                        break;
-                    case ExifInterface.ORIENTATION_ROTATE_180:
-                        m.preRotate(180);
-                        break;
-
-                }
-                // Rotates the image according to the orientation
-                rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return rotatedBitmap;
     }
 
     public static void verifyStoragePermissions(Activity activity) {
@@ -213,6 +116,141 @@ public class MediaUtility {
         }
     }
 
+    public MediaUtility(Activity act) {
+        c = act;
+    }
+
+    public static void saveOrientedImage(Bitmap bitmap, File file) {
+
+        OutputStream os;
+        try {
+            os = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            os.flush();
+            os.close();
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
+
+    public Uri getMediaFileURI(String dirName, String folderName, String mediaName) {
+        File mediaFile = null;
+        try {
+            File mediaStorageDir = new File(String.format("%s/%s/%s", Environment.getExternalStorageDirectory(), dirName, folderName));
+            // Create a media file name
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                    + mediaName);
+            if (!mediaFile.exists()) {
+                mediaFile.getParentFile().mkdirs();
+                mediaFile.createNewFile();
+            }
+        } catch (Exception e) {
+            Toast.makeText(c, "URI Error=" + e,
+                    Toast.LENGTH_LONG).show();
+            e.getMessage();
+        }
+        return Uri.fromFile(mediaFile);
+    }
+
+    public Uri getMediaFileURI(String dirName, String folderName, String mediaName, Activity activity) {
+        File mediaFile = null;
+        try {
+            File mediaStorageDir = new File(String.format("%s/%s/%s", Environment.getExternalStorageDirectory(), dirName, folderName));
+            // Create a media file name
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                    + mediaName);
+            if (!mediaFile.exists()) {
+                mediaFile.getParentFile().mkdirs();
+                mediaFile.createNewFile();
+            }
+        } catch (Exception e) {
+            Toast.makeText(c, "URI Error=" + e,
+                    Toast.LENGTH_LONG).show();
+            e.getMessage();
+        }
+
+
+        Uri photoURI = FileProvider.getUriForFile(activity,
+                BuildConfig.APPLICATION_ID + ".provider",
+                mediaFile);
+
+
+        return photoURI;
+    }
+
+    public File getOutputMediaFile(String dirName, String folderName, String mediaName) {
+        File mediaFile = null;
+        try {
+            File mediaStorageDir = new File(String.format("%s/%s/%s", Environment.getExternalStorageDirectory(), dirName, folderName));
+            // Create a media file name
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                    + mediaName);
+            if (!mediaFile.exists()) {
+                mediaFile.getParentFile().mkdirs();
+                mediaFile.createNewFile();
+            }
+        } catch (Exception e) {
+            Toast.makeText(c, "URI Error=" + e,
+                    Toast.LENGTH_LONG).show();
+        }
+        return mediaFile;
+    }
+
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+        if (height > reqHeight || width > reqWidth) {
+
+            // Calculate ratios of height and width to requested height and width
+            final int heightRatio = Math.round((float) height / (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+            // Choose the smallest ratio as inSampleSize value, this will guarantee
+            // a final image with both dimensions larger than or equal to the
+            // requested height and width.
+            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+        }
+        return inSampleSize;
+    }
+
+    public Bitmap getRotatedBitmap(String path, Bitmap bitmap) {
+        Bitmap rotatedBitmap = null;
+        Matrix m = new Matrix();
+        ExifInterface exif = null;
+        int orientation = 1;
+
+        try {
+            if (path != null) {
+                // Getting Exif information of the file
+                exif = new ExifInterface(path);
+            }
+            if (exif != null) {
+                orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
+                switch (orientation) {
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                        m.preRotate(270);
+                        break;
+
+                    case ExifInterface.ORIENTATION_ROTATE_90:
+                        m.preRotate(90);
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        m.preRotate(180);
+                        break;
+                    default:
+
+                }
+                // Rotates the image according to the orientation
+                rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+            }
+        } catch (IOException e) {
+            e.getMessage();
+        }
+
+        return rotatedBitmap;
+    }
+
     public static void playAudio(Activity activity, String filePath) {
         try {
             Intent viewMediaIntent = new Intent();
@@ -224,7 +262,7 @@ public class MediaUtility {
             activity.startActivity(ii);
             activity.overridePendingTransition(R.anim.right_in, R.anim.left_out);
         } catch (Exception e) {
-            System.out.println("Audio Player Error :" + e.toString());
+            e.getMessage();
         }
     }
 
@@ -239,7 +277,46 @@ public class MediaUtility {
             activity.startActivity(ii);
             activity.overridePendingTransition(R.anim.right_in, R.anim.left_out);
         } catch (Exception e) {
-            System.out.println("Video Player Error :" + e.toString());
+            e.getMessage();
         }
+    }
+
+    public static boolean removeDirectory(File directory) {
+
+        // System.out.println("removeDirectory " + directory);
+
+        if (directory == null)
+            return false;
+        if (!directory.exists())
+            return true;
+        if (!directory.isDirectory())
+            return false;
+
+
+        final File to = new File(directory.getAbsolutePath() + System.currentTimeMillis());
+        directory.renameTo(to);
+        to.delete();
+
+        /*String[] list = directory.list();
+
+        // Some JVMs return null for File.list() when the
+        // directory is empty.
+        if (list != null) {
+            for (int i = 0; i < list.length; i++) {
+                File entry = new File(directory, list[i]);
+
+                //        System.out.println("\tremoving entry " + entry);
+
+                if (entry.isDirectory()) {
+                    if (!removeDirectory(entry))
+                        return false;
+                } else {
+                    if (!entry.delete())
+                        return false;
+                }
+            }
+        }*/
+
+        return to.delete();
     }
 }
