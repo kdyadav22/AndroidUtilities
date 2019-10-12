@@ -35,6 +35,8 @@ public class AlertDialogManager {
             if (Utility.isNotNullNotEmptyNotWhiteSpace(title)) {
                 titleTextView.setVisibility(View.VISIBLE);
                 titleTextView.setText(title);
+            }else{
+                titleTextView.setVisibility(View.GONE);
             }
 
             TextView message = mdialog.findViewById(R.id.msg);
@@ -72,6 +74,8 @@ public class AlertDialogManager {
             if (Utility.isNotNullNotEmptyNotWhiteSpace(title)) {
                 titleTextView.setVisibility(View.VISIBLE);
                 titleTextView.setText(title);
+            }else{
+                titleTextView.setVisibility(View.GONE);
             }
 
             TextView message = mdialog.findViewById(R.id.msg);
