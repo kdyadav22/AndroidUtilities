@@ -32,7 +32,7 @@
             android:textColor="@color/md_grey_800"
             android:textSize="@dimen/_15ssp"
             android:textStyle="bold"
-            android:visibility="gone">
+            android:visibility="invisible">
 
         </TextView>
 

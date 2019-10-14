@@ -6,8 +6,10 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Objects;
@@ -15,7 +17,7 @@ import java.util.Objects;
 
 public class AlertDialogManager {
 
-    public static void showAlertDialog(Activity activity, String title, String msg) {
+    public static void showAlertDialog(Activity activity, String title, String msg, boolean willBeGone) {
         try {
             final Dialog mdialog = new Dialog(activity);
             Objects.requireNonNull(mdialog.getWindow()).requestFeature(Window.FEATURE_NO_TITLE);
@@ -29,19 +31,21 @@ public class AlertDialogManager {
             //wlp.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
             window.setAttributes(wlp);
             //mdialog.getWindow().setLayout(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
+            TextView message = mdialog.findViewById(R.id.msg);
             TextView okButton = mdialog.findViewById(R.id.okButton);
             TextView titleTextView = mdialog.findViewById(R.id.title);
             if (Utility.isNotNullNotEmptyNotWhiteSpace(title)) {
                 titleTextView.setVisibility(View.VISIBLE);
                 titleTextView.setText(title);
-            }else{
-                titleTextView.setVisibility(View.GONE);
+            } else {
+                if (willBeGone) {
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(0, 10, 0, 10);
+                    message.setLayoutParams(layoutParams);
+                    titleTextView.setVisibility(View.GONE);
+                } else titleTextView.setVisibility(View.INVISIBLE);
             }
-
-            TextView message = mdialog.findViewById(R.id.msg);
             message.setText(msg);
-
             okButton.setOnClickListener(v -> {
                 mdialog.dismiss();
             });
@@ -54,7 +58,7 @@ public class AlertDialogManager {
         }
     }
 
-    public static void showAlertDialogWithCallBack(Activity activity, String title, String msg, OkButtonCallBack okButtonCallBack) {
+    public static void showAlertDialogWithCallBack(Activity activity, String title, String msg, OkButtonCallBack okButtonCallBack, boolean willBeGone) {
         try {
             final Dialog mdialog = new Dialog(activity);
             Objects.requireNonNull(mdialog.getWindow()).requestFeature(Window.FEATURE_NO_TITLE);
@@ -68,19 +72,21 @@ public class AlertDialogManager {
             //wlp.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
             window.setAttributes(wlp);
             //mdialog.getWindow().setLayout(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
+            TextView message = mdialog.findViewById(R.id.msg);
             TextView okButton = mdialog.findViewById(R.id.okButton);
             TextView titleTextView = mdialog.findViewById(R.id.title);
             if (Utility.isNotNullNotEmptyNotWhiteSpace(title)) {
                 titleTextView.setVisibility(View.VISIBLE);
                 titleTextView.setText(title);
-            }else{
-                titleTextView.setVisibility(View.GONE);
+            } else {
+                if (willBeGone) {
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(0, 10, 0, 10);
+                    message.setLayoutParams(layoutParams);
+                    titleTextView.setVisibility(View.GONE);
+                } else titleTextView.setVisibility(View.INVISIBLE);
             }
-
-            TextView message = mdialog.findViewById(R.id.msg);
             message.setText(msg);
-
             okButton.setOnClickListener(v -> {
                 if (okButtonCallBack != null) {
                     okButtonCallBack.onOKClick();
