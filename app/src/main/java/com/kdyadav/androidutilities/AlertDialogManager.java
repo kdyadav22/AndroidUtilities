@@ -42,7 +42,7 @@ public class AlertDialogManager {
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     layoutParams.setMargins(0, 10, 0, 10);
                     message.setLayoutParams(layoutParams);
-                    titleTextView.setVisibility(View.GONE);
+                    titleTextView.setVisibility(View.INVISIBLE);
                 } else titleTextView.setVisibility(View.INVISIBLE);
             }
             message.setText(msg);
@@ -83,7 +83,7 @@ public class AlertDialogManager {
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     layoutParams.setMargins(0, 10, 0, 10);
                     message.setLayoutParams(layoutParams);
-                    titleTextView.setVisibility(View.GONE);
+                    titleTextView.setVisibility(View.INVISIBLE);
                 } else titleTextView.setVisibility(View.INVISIBLE);
             }
             message.setText(msg);
